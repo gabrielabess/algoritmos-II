@@ -1,127 +1,106 @@
-// ♫ ♬ ♪ ♫ ♬ ♪ ♫  REPRODUTOR DE MÚSICA ♫ ♬ ♪ ♫ ♬ ♪ ♫ //
-// Discentes: Fernanda Siviero, Gabriela Bés, Júlia Fochezato
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Musica
-{
+typedef struct Musica {
     char title[100];
     char artist[100];
 } Musica;
 
-typedef struct No
-{
+typedef struct No {
     Musica musica;
     struct No *prox;
     struct No *ant;
 } No;
 
-typedef struct Playlist
-{
+typedef struct Playlist {
     No *head;
     No *tail;
 } Playlist;
 
-void inicializar(Playlist *p)
-{
+void inicializar(Playlist *p) {
     p->head = NULL;
     p->tail = NULL;
 }
 
-void voltar_pular(Playlist *p, Musica musica){
-	char op; 
-	printf("<<V  ou  A>> \nOpção desejada (V, A ou S):");
-	scanf(" %s", &op);
-	
+void voltar_pular(Playlist *p, No *atual) {
+    char op;
+    do {
+        printf("\n♫ ♬ ♪ Tocando agora: %s - %s\n", atual->musica.title, atual->musica.artist);
+        printf("<< [V] Voltar  |  [A] Avançar  |  [S] Sair >>\n");
+        printf("Opção desejada: ");
+        scanf(" %c", &op);
+
+        if (op == 'V' || op == 'v') {
+            if (atual->ant != NULL) {
+                atual = atual->ant;
+            } else {
+                printf("\n⚠️ Início da playlist! Não há anterior. Voltando ao menu...\n");
+                op = 'S';
+            }
+        } 
+        else if (op == 'A' || op == 'a') {
+            if (atual->prox != NULL) {
+                atual = atual->prox;
+            } else {
+                printf("\n⚠️ Fim da playlist! Não há próxima. Voltando ao menu...\n");
+                op = 'S';
+            }
+        }
+    } while (op != 'S' && op != 's');
 }
 
-void inserir_inicio(Playlist *p, Musica musica)
-{
+void inserir_inicio(Playlist *p, Musica musica) {
     No *novo = (No *)malloc(sizeof(No));
-
     novo->musica = musica;
     novo->ant = NULL;
     novo->prox = p->head;
-
-    if (p->head != NULL)
-        p->head->ant = novo;
-    else
-        p->tail = novo;
-
+    if (p->head != NULL) p->head->ant = novo;
+    else p->tail = novo;
     p->head = novo;
 }
 
-void inserir_fim(Playlist *p, Musica musica)
-{
+void inserir_fim(Playlist *p, Musica musica) {
     No *novo = (No *)malloc(sizeof(No));
-
     novo->musica = musica;
     novo->prox = NULL;
     novo->ant = p->tail;
-
-    if (p->tail != NULL)
-        p->tail->prox = novo;
-    else
-        p->head = novo;
-
+    if (p->tail != NULL) p->tail->prox = novo;
+    else p->head = novo;
     p->tail = novo;
 }
 
-void mostrar_Playlist(Playlist *p)
-{
+void mostrar_Playlist(Playlist *p) {
     No *atual = p->head;
     printf("\n♫ ♬ ♪ ♫ ♬ ♪ ♫ PLAYLIST ♫ ♬ ♪ ♫ ♬ ♪ ♫ \n");
-
-    if (atual == NULL)
-    {
-        printf("\n ------------ PLAYLIST VAZIA! ------------\n");
-    };
-
-    while (atual != NULL)
-    {
-        printf("♫ ♬ ♪ Titulo: %s - ♫ ♬ ♪ Artista: %s\n", atual->musica.title, atual->musica.artist);
+    if (atual == NULL) printf("\n ------------ PLAYLIST VAZIA! ------------\n");
+    while (atual != NULL) {
+        printf("♫ Titulo: %s - Artista: %s\n", atual->musica.title, atual->musica.artist);
         atual = atual->prox;
     }
-    printf("\n♫ ♬ ♪ ♫ ♬  FIM DA PLAYLIST ♫ ♬ ♪ ♫ ♬\n");
 }
 
-No *buscar(Playlist *p, char titulo[])
-{
+No *buscar(Playlist *p, char titulo[]) {
     No *atual = p->head;
-
-    while (atual != NULL)
-    {
-        if (strcmp(atual->musica.title, titulo) == 0)
-        {
-            printf("⚠️ Música não encontrada! ⚠️\n");
-            return atual;
-        }
+    while (atual != NULL) {
+        if (strcmp(atual->musica.title, titulo) == 0) return atual;
         atual = atual->prox;
     }
-
-    printf("⚠️ Música não encontrada! ⚠️\n");
-    printf("\n♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬\n");
     return NULL;
 }
 
-int tocar(Playlist *p, char titulo[])
-{
+int tocar(Playlist *p, char titulo[]) {
     No *atual = p->head;
 
-    while (atual != NULL)
-    {
-        if (strcmp(atual->musica.title, titulo) == 0)
-        {
-            printf("\n♪ ♫ ♬ Tocando agora: %s - %s\n", atual->musica.title, atual->musica.artist);
+    while (atual != NULL) {
+        if (strcmp(atual->musica.title, titulo) == 0) {
+            voltar_pular(p, atual); 
             return 1;
         }
         atual = atual->prox;
     }
 
     printf("⚠️ Música não encontrada! ⚠️\n");
-    printf("\n♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬\n");
     return 0;
 }
 
@@ -238,7 +217,7 @@ int main()
         printf("5 - BUSCAR MÚSICA\n");
         printf("6 - REMOVER MÚSICA\n");
         printf("7 - EXCLUIR PLAYLIST\n");
-        printf("8 - INSERIR APÓS\n");
+        printf("8 - INSERIR APÓS MÚSICA ESPECÍFICA\n");
         printf("0 - SAIR\n");
         printf("\n♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬ ♪ ♫ ♬\n");
         printf("---------------- SELECIONE A OPÇÃO DESEJADA ----------------\n");
